@@ -47,12 +47,11 @@ public class Game extends AppCompatActivity {
         String result = null;
         String[] score;
         TextView ScoreTextView = (TextView)findViewById(R.id.ScoreTextView);
+        JSONObject json
             try {
                 URL url = new URL(score_url);
                 HttpURLConnection httpURLConnection = (HttpURLConnection)url.openConnection();
-                httpURLConnection.setRequestMethod("POST");
-
-                is = new BufferedInputStream(httpURLConnection.getInputStream());
+                JSONObject json = jParser.makeHttpRequest(score_url, "POST", String);
 
             } catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -60,22 +59,13 @@ public class Game extends AppCompatActivity {
                 e.printStackTrace();
             }
             try{
-                BufferedReader br = new BufferedReader(new InputStreamReader(is, "iso-8859-1"), 8);
-                StringBuilder sb = new StringBuilder();
-
-                while((line=br.readLine()) != null){
-                    sb.append(line+"\n");
-                }
-                is.close();
-                result = sb.toString();
+                json = jParser.makeHttpRequest(score_url, "POST", String);
             }catch (Exception e){
                 e.printStackTrace();
             }
 
         try {
-            JSONObject jObject;
-            jObject = new JSONObject(result);
-            String A_score = jObject.getString("A_score");
+            String A_score = json.getString("A_score");
             ScoreTextView.setText(A_score);
         } catch (JSONException e) {
             // TODO Auto-generated catch block
