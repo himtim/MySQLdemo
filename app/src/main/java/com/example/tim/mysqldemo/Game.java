@@ -1,5 +1,6 @@
 package com.example.tim.mysqldemo;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.design.widget.FloatingActionButton;
@@ -7,6 +8,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import org.json.JSONArray;
@@ -23,13 +25,15 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 public class Game extends AppCompatActivity {
-
+    private TextView ScoreTextView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
 
-        TextView ScoreTextView = (TextView)findViewById(R.id.ScoreTextView);
+        Button btn_dom = (Button)findViewById(R.id.btn_dom);
+        Button btn_score = (Button)findViewById(R.id.btn_score);
+        ScoreTextView = (TextView)findViewById(R.id.ScoreTextView);
     }
     public void OnDominate(View view){
         String gid = "1";
@@ -39,37 +43,66 @@ public class Game extends AppCompatActivity {
         BackgroundWorker backgroundWorker = new BackgroundWorker(this);
         backgroundWorker.execute(type, gid, uid, point);
     }
-    public void OnShowScore(View view){
+    public void OnShowScore(View view) throws IOException {
         String rid = "1";
         String score_url = "http://come2jp.com/dominion/showScore.php?rid="+rid;
-        InputStream is = null;
-        String line = null;
-        String result = null;
-        String[] score;
-        TextView ScoreTextView = (TextView)findViewById(R.id.ScoreTextView);
-        JSONObject json
-            try {
-                URL url = new URL(score_url);
-                HttpURLConnection httpURLConnection = (HttpURLConnection)url.openConnection();
-                JSONObject json = jParser.makeHttpRequest(score_url, "GET", );
+        new JSONTask().execute(score_url);
+    }
 
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try{
-                json = jParser.makeHttpRequest(score_url, "POST", String);
+    public class JSONTask extends AsyncTask<String,String,String>{
+
+        @Override
+        protected String doInBackground(String... params) {
+            String result = null;
+            BufferedReader reader = null;
+            HttpURLConnection connection = null;
+            TextView ScoreTextView = (TextView)findViewById(R.id.ScoreTextView);
+            try {
+                URL url = new URL(params[0]);
+                connection = (HttpURLConnection)url.openConnection();
+                connection.connect();
+
+                InputStream stream = connection.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(stream));
+
+                StringBuilder sb = new StringBuilder();
+                StringBuffer buffer = new StringBuffer();
+
+                String line ="";
+                while((line=reader.readLine()) != null){
+                    buffer.append(line);
+                }
+
+                JSONObject parentObject = new JSONObject(buffer.toString());
+                JSONArray parentArray = parentObject.getJSONArray("scores");
+
+                JSONObject finalObject = parentArray.getJSONObject(0);
+
+                String A_Score = finalObject.getString("A_score");
+                String B_Score = finalObject.getString("B_score");
+
+                return "A score: " + A_Score + " B score: " + B_Score;
             }catch (Exception e){
                 e.printStackTrace();
+            } finally {
+                if (connection != null){
+                    connection.disconnect();
+                }
+                try{
+                    if(reader != null){
+                        reader.close();
+                    }
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
             }
+            return null;
+        }
 
-        try {
-            String A_score = json.getString("A_score");
-            ScoreTextView.setText(A_score);
-        } catch (JSONException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            ScoreTextView.setText(result);
         }
     }
 }
