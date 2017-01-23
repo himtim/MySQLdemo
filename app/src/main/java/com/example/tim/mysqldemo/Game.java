@@ -51,7 +51,7 @@ public class Game extends AppCompatActivity {
             try {
                 URL url = new URL(score_url);
                 HttpURLConnection httpURLConnection = (HttpURLConnection)url.openConnection();
-                JSONObject json = jParser.makeHttpRequest(score_url, "POST", String);
+                JSONObject json = jParser.makeHttpRequest(score_url, "GET", );
 
             } catch (MalformedURLException e) {
                 e.printStackTrace();
