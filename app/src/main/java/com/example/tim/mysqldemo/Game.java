@@ -26,6 +26,7 @@ import java.net.URL;
 
 public class Game extends AppCompatActivity {
     private TextView ScoreTextView;
+    private TextView PointTextView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -33,30 +34,37 @@ public class Game extends AppCompatActivity {
 
         Button btn_dom = (Button)findViewById(R.id.btn_dom);
         Button btn_score = (Button)findViewById(R.id.btn_score);
+        Button btn_PointStatus = (Button)findViewById(R.id.btn_PointStatus);
         ScoreTextView = (TextView)findViewById(R.id.ScoreTextView);
+        PointTextView = (TextView)findViewById(R.id.PointTextView);
     }
     public void OnDominate(View view){
-        String gid = "1";
+        String rid = "1";
         String uid = "1";
         String point = "4";
         String type = "dominate";
         BackgroundWorker backgroundWorker = new BackgroundWorker(this);
-        backgroundWorker.execute(type, gid, uid, point);
+        backgroundWorker.execute(type, rid, uid, point);
     }
     public void OnShowScore(View view) throws IOException {
         String rid = "1";
         String score_url = "http://come2jp.com/dominion/showScore.php?rid="+rid;
-        new JSONTask().execute(score_url);
+        new GetScoreTask().execute(score_url);
     }
 
-    public class JSONTask extends AsyncTask<String,String,String>{
+    public void OnShowPointStatus(View view) throws IOException {
+        String rid = "1";
+        String point_url = "http://come2jp.com/dominion/showPointStatus.php?rid="+rid;
+        new GetPointTask().execute(point_url);
+    }
+
+    public class GetScoreTask extends AsyncTask<String,String,String>{
 
         @Override
         protected String doInBackground(String... params) {
             String result = null;
             BufferedReader reader = null;
             HttpURLConnection connection = null;
-            TextView ScoreTextView = (TextView)findViewById(R.id.ScoreTextView);
             try {
                 URL url = new URL(params[0]);
                 connection = (HttpURLConnection)url.openConnection();
@@ -74,12 +82,12 @@ public class Game extends AppCompatActivity {
                 }
 
                 JSONObject parentObject = new JSONObject(buffer.toString());
-                JSONArray parentArray = parentObject.getJSONArray("scores");
+                //JSONArray parentArray = parentObject.getJSONArray("scores");
 
-                JSONObject finalObject = parentArray.getJSONObject(0);
+                //JSONObject finalObject = parentArray.getJSONObject(0);
 
-                String A_Score = finalObject.getString("A_score");
-                String B_Score = finalObject.getString("B_score");
+                String A_Score = parentObject.getString("A_score");
+                String B_Score = parentObject.getString("B_score");
 
                 return "A score: " + A_Score + " B score: " + B_Score;
             }catch (Exception e){
@@ -103,6 +111,65 @@ public class Game extends AppCompatActivity {
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
             ScoreTextView.setText(result);
+        }
+    }
+    public class GetPointTask extends AsyncTask<String,String,String>{
+
+        @Override
+        protected String doInBackground(String... params) {
+            String result = null;
+            BufferedReader reader = null;
+            HttpURLConnection connection = null;
+            try {
+                URL url = new URL(params[0]);
+                connection = (HttpURLConnection)url.openConnection();
+                connection.connect();
+
+                InputStream stream = connection.getInputStream();
+                reader = new BufferedReader(new InputStreamReader(stream));
+
+                StringBuilder sb = new StringBuilder();
+                StringBuffer buffer = new StringBuffer();
+
+                String line ="";
+                while((line=reader.readLine()) != null){
+                    buffer.append(line);
+                }
+
+                JSONObject parentObject = new JSONObject(buffer.toString());
+                JSONArray parentArray = parentObject.getJSONArray("points");
+
+                StringBuffer finalBufferedData = new StringBuffer();
+                for (int i=0;i<parentArray.length();i++){
+                    JSONObject finalObject = parentArray.getJSONObject(i);
+                    String uname = finalObject.getString("uname");
+                    String pointID = finalObject.getString("pointID");
+                    String pointName = finalObject.getString("pointName");
+
+                    finalBufferedData.append("uname: " + uname + " pointID: " + pointID + " pointName:  " + pointName + "\n");
+                }
+                return finalBufferedData.toString();
+            }catch (Exception e){
+                e.printStackTrace();
+            } finally {
+                if (connection != null){
+                    connection.disconnect();
+                }
+                try{
+                    if(reader != null){
+                        reader.close();
+                    }
+                }catch (IOException e){
+                    e.printStackTrace();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            PointTextView.setText(result);
         }
     }
 }
