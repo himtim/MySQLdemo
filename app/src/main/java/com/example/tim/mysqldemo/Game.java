@@ -143,10 +143,10 @@ public class Game extends AppCompatActivity {
                 for (int i=0;i<parentArray.length();i++){
                     JSONObject finalObject = parentArray.getJSONObject(i);
                     String uname = finalObject.getString("uname");
-                    String pointID = finalObject.getString("pointID");
-                    String pointName = finalObject.getString("pointName");
+                    String GeneratorID = finalObject.getString("GeneratorID");
+                    String GeneratorName = finalObject.getString("GeneratorName");
 
-                    finalBufferedData.append("uname: " + uname + " pointID: " + pointID + " pointName:  " + pointName + "\n");
+                    finalBufferedData.append("uname: " + uname + " GeneratorID: " + GeneratorID + " GeneratorName:  " + GeneratorName + "\n");
                 }
                 return finalBufferedData.toString();
             }catch (Exception e){
