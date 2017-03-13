@@ -1,5 +1,9 @@
 <resources>
-    <string name="app_name">MySQLdemo</string>
+    <string name="app_name">Demo</string>
     <string name="title_activity_register">Register</string>
     <string name="title_activity_game">Game</string>
+    <string name="title_activity_get_json">GetJSON</string>
+
+    <string name="action_refresh">Refresh</string>
+    <string name="title_activity_waiting_room">WaitingRoom</string>
 </resources>

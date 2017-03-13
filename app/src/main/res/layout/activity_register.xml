@@ -1,15 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:paddingLeft="70dp"
+    android:paddingTop="190dp"
+    android:background="@drawable/secu" >
 
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:inputType="textPassword"
-        android:ems="10"
         android:id="@+id/etPassword"
         android:hint="Password"
+        android:textColor="#DDDDDD"
+        android:textColorHint="#BBDBDD"
         android:layout_below="@+id/etUserName"
         android:layout_alignLeft="@+id/etUserName"
         android:layout_alignStart="@+id/etUserName" />
@@ -20,6 +24,9 @@
         android:layout_height="wrap_content"
         android:id="@+id/btn_reg"
         android:onClick="OnReg"
+        android:background="@drawable/my_button_bg"
+        android:textStyle="bold"
+        android:textColor="#FFFDDF"
         android:layout_marginTop="42dp"
         android:layout_below="@+id/etPassword"
         android:layout_alignLeft="@+id/etPassword"
@@ -29,6 +36,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:inputType="textPassword"
+        android:textColor="#DDDDDD"
+        android:textColorHint="#BBDBDD"
         android:ems="10"
         android:id="@+id/etPassword2"
         android:hint="Confirm Password"
@@ -39,9 +48,8 @@
     <EditText
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="33dp"
-        android:layout_marginStart="33dp"
-        android:layout_marginTop="73dp"
+        android:textColor="#DDDDDD"
+        android:textColorHint="#BBDBDD"
         android:id="@+id/etUserName"
         android:hint="Name"
         android:layout_alignParentTop="true"
