@@ -12,7 +12,6 @@ import android.widget.EditText;
 
 public class Register extends AppCompatActivity {
     EditText username, password, password2;
-    String str_username, str_password, str_password2;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);

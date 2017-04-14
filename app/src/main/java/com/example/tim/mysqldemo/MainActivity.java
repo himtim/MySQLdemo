@@ -17,9 +17,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        SharedPreferences pref = getApplicationContext().getSharedPreferences("data", MODE_PRIVATE);
-        String uid = pref.getString("uid", null);
-        if(!TextUtils.isEmpty(uid)){
+        SharedPreferences pref = getApplicationContext().getSharedPreferences("SessionCookieStore", MODE_PRIVATE);
+        String sessionId = pref.getString("SessionID", "");
+        if(!TextUtils.isEmpty(sessionId)){
             startActivity(new Intent(MainActivity.this, Lobby.class));
         }
         UserNameEt = (EditText)findViewById(R.id.etUserName);

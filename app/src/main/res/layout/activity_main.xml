@@ -1,40 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:layout_gravity="center"
-    android:paddingLeft="70dp"
+    android:paddingLeft="80dp"
     android:paddingTop="190dp"
     android:background="@drawable/secu">
 
+    <ImageView
+        android:layout_width="40dp"
+        android:layout_height="35dp"
+        app:srcCompat="@drawable/user2"
+        android:id="@+id/imageView3" />
+
     <EditText
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="textPassword"
-        android:id="@+id/etPassword"
-        android:layout_below="@+id/etUserName"
-        android:layout_alignLeft="@+id/etUserName"
-        android:layout_alignStart="@+id/etUserName"
+        android:id="@+id/etUserName"
+        android:inputType="text"
         android:textColor="#DDDDDD"
         android:textColorHint="#BBDBDD"
-        android:hint="Password" />
+        android:layout_height="40dp"
+        android:background="@drawable/edittext_bottom_line"
+        android:hint="Username"
+        android:textSize="22dp"
+        android:layout_alignParentTop="true"
+        android:layout_toRightOf="@+id/imageView3"
+        android:layout_toEndOf="@+id/imageView3" />
 
-    <Button
-        android:text="Register"
+    <EditText
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:id="@+id/btn_reg"
-        android:onClick="OpenReg"
-        android:background="@drawable/my_button_bg"
-        android:textStyle="bold"
-        android:textColor="#00334d"
-        android:layout_marginLeft="10dp"
-        android:layout_alignBaseline="@+id/btnLogin"
-        android:layout_alignBottom="@+id/btnLogin"
-        android:layout_toRightOf="@+id/btnLogin"
-        android:layout_toEndOf="@+id/btnLogin"/>
+        android:layout_height="40dp"
+        android:inputType="textPassword"
+        android:id="@+id/etPassword"
+        android:textSize="22dp"
+        android:textColor="#DDDDDD"
+        android:textColorHint="#BBDBDD"
+        android:background="@drawable/edittext_bottom_line"
+        android:hint="Password"
+        android:layout_below="@+id/etUserName"
+        android:layout_toRightOf="@+id/imageView2"
+        android:layout_toEndOf="@+id/imageView2" />
 
     <Button
         android:text="Login"
@@ -45,21 +52,36 @@
         android:onClick="OnLogin"
         android:background="@drawable/my_button_bg"
         android:textStyle="bold"
-        android:textColor="#00334d"
+        android:textColor="#ccffff"
         android:layout_below="@+id/etPassword"
-        android:layout_alignLeft="@+id/etPassword"
-        android:layout_alignStart="@+id/etPassword"/>
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="15dp" />
 
-    <EditText
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:id="@+id/etUserName"
-        android:inputType="text"
-        android:textColor="#DDDDDD"
-        android:textColorHint="#BBDBDD"
-        android:hint="Username"
-        android:layout_alignParentTop="true"
+    <ImageView
+        android:layout_width="40dp"
+        android:layout_height="35dp"
+        app:srcCompat="@drawable/pw"
+        android:id="@+id/imageView2"
+        android:layout_below="@+id/etUserName"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true" />
+
+    <Button
+        android:text="Register"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:id="@+id/btn_reg"
+        android:onClick="OpenReg"
+        android:background="@drawable/my_button_bg"
+        android:textStyle="bold"
+        android:textColor="#ccffff"
+        android:layout_marginLeft="11dp"
+        android:layout_alignBaseline="@+id/btnLogin"
+        android:layout_alignBottom="@+id/btnLogin"
+        android:layout_toRightOf="@+id/btnLogin"
+        android:layout_toEndOf="@+id/btnLogin"
+        android:layout_marginStart="11dp" />
 
 </RelativeLayout>

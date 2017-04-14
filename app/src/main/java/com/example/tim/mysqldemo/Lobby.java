@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -52,6 +53,8 @@ public class Lobby extends AppCompatActivity {
     private ListView lvRooms;
     private TextView tvIntro;
     String LobbyID = "1";
+    private int mInterval = 5000; // 5 seconds by default, can be changed later
+    private Handler mHandler;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,6 +64,35 @@ public class Lobby extends AppCompatActivity {
         String LobbyID = "1";
         String getroom_url = "http://come2jp.com/dominion/showGameRoom.php?LobbyID=" + LobbyID;
         new GetGameRoomTask(this).execute(getroom_url);
+
+        mHandler = new Handler();
+        startRepeatingTask();
+    }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        stopRepeatingTask();
+    }
+
+    Runnable mStatusChecker = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                String getroom_url = "http://come2jp.com/dominion/showGameRoom.php?LobbyID=" + LobbyID;
+                new GetGameRoomTask(getApplicationContext()).execute(getroom_url); //this function can change value of mInterval.
+            } finally {
+                // 100% guarantee that this always happens, even if,   your update method throws an exception
+                mHandler.postDelayed(mStatusChecker, mInterval);
+            }
+        }
+    };
+
+    void startRepeatingTask() {
+        mStatusChecker.run();
+    }
+
+    void stopRepeatingTask() {
+        mHandler.removeCallbacks(mStatusChecker);
     }
 
     public void setLobby(){
@@ -75,13 +107,12 @@ public class Lobby extends AppCompatActivity {
     public void OnLogout(View view){
         SharedPreferences pref = this.getSharedPreferences("data", MODE_PRIVATE);
         SharedPreferences.Editor editor=pref.edit();
-        editor.remove("uid").commit();
+        editor.remove("SessionID").commit();
         (Lobby.this).finish();
     }
 
     public class GetGameRoomTask extends AsyncTask<String, String, List<RoomModel>> {
         Context context;
-
         GetGameRoomTask(Context ctx) {
             context = ctx;
         }
@@ -203,7 +234,6 @@ public class Lobby extends AppCompatActivity {
         }
     }
 
-
     public class CreateRoomTask extends AsyncTask<String, Void, String> {
         Context context;
         AlertDialog.Builder builder;
@@ -214,33 +244,15 @@ public class Lobby extends AppCompatActivity {
 
         @Override
         protected String doInBackground(String... params) {
-            String uid = params[0];
-            String lobbyid = params[1];
-            String createroom_url = params[2];
+            String lobbyid = params[0];
+            String createroom_url = params[1];
             try {
                 URL url = new URL(createroom_url);
-                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-                httpURLConnection.setRequestMethod("POST");
-                httpURLConnection.setDoOutput(true);
-                httpURLConnection.setDoInput(true);
-                OutputStream outputStream = httpURLConnection.getOutputStream();
-                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
-                String post_data = URLEncoder.encode("uid", "UTF-8") + "=" + URLEncoder.encode(uid, "UTF-8") + "&"
-                        + URLEncoder.encode("LobbyID", "UTF-8") + "=" + URLEncoder.encode(lobbyid, "UTF-8");
-                bufferedWriter.write(post_data);
-                bufferedWriter.flush();
-                bufferedWriter.close();
-                outputStream.close();
-                InputStream inputStream = httpURLConnection.getInputStream();
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "iso-8859-1"));
-                String result = "";
-                String line = "";
-                while ((line = bufferedReader.readLine()) != null) {
-                    result += line;
-                }
-                bufferedReader.close();
-                inputStream.close();
-                httpURLConnection.disconnect();
+                ConnectionHandler conHan = new ConnectionHandler(url);
+                conHan.useSession(context);
+                String post_data = URLEncoder.encode("LobbyID", "UTF-8") + "=" + URLEncoder.encode(lobbyid, "UTF-8");
+                conHan.post(post_data);
+                String result = conHan.get();
                 return result;
             } catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -262,12 +274,6 @@ public class Lobby extends AppCompatActivity {
                 builder.setMessage(result);
                 builder.setNegativeButton("Back", null);
             } else {
-                SharedPreferences pref = getApplicationContext().getSharedPreferences("data", MODE_PRIVATE);
-                SharedPreferences.Editor editor=pref.edit();
-                editor.putString("rid", result);
-                editor.putString("lid", LobbyID);
-                editor.putBoolean("rmAdmin",true);
-                editor.commit();
                 builder.setMessage("success");
                 builder.setPositiveButton("Enter Game Room", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog,
@@ -286,11 +292,9 @@ public class Lobby extends AppCompatActivity {
     }
 
     public void OnCreateGameRoom(View view) throws IOException {
-        SharedPreferences pref = getApplicationContext().getSharedPreferences("data", MODE_PRIVATE);
-        String uid = pref.getString("uid", null);
         String lobbyid = "1";
         String create_url = "http://come2jp.com/dominion/createGameRoom.php";
-        new CreateRoomTask(this).execute(uid, lobbyid, create_url);
+        new CreateRoomTask(this).execute(lobbyid, create_url);
     }
 
     public class JoinRoomTask extends AsyncTask<String, Void, String> {
@@ -304,32 +308,14 @@ public class Lobby extends AppCompatActivity {
         @Override
         protected String doInBackground(String... params) {
             String rid = params[0];
-            String uid = params[1];
             String joinroom_url = "http://come2jp.com/dominion/joinGameRoom.php";
             try {
                 URL url = new URL(joinroom_url);
-                HttpURLConnection httpURLConnection = (HttpURLConnection) url.openConnection();
-                httpURLConnection.setRequestMethod("POST");
-                httpURLConnection.setDoOutput(true);
-                httpURLConnection.setDoInput(true);
-                OutputStream outputStream = httpURLConnection.getOutputStream();
-                BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
-                String post_data = URLEncoder.encode("rid", "UTF-8") + "=" + URLEncoder.encode(rid, "UTF-8") + "&"
-                        + URLEncoder.encode("uid", "UTF-8") + "=" + URLEncoder.encode(uid, "UTF-8");
-                bufferedWriter.write(post_data);
-                bufferedWriter.flush();
-                bufferedWriter.close();
-                outputStream.close();
-                InputStream inputStream = httpURLConnection.getInputStream();
-                BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, "iso-8859-1"));
-                String result = "";
-                String line = "";
-                while ((line = bufferedReader.readLine()) != null) {
-                    result += line;
-                }
-                bufferedReader.close();
-                inputStream.close();
-                httpURLConnection.disconnect();
+                ConnectionHandler conHan = new ConnectionHandler(url);
+                conHan.useSession(context);
+                String post_data = URLEncoder.encode("rid", "UTF-8") + "=" + URLEncoder.encode(rid, "UTF-8");
+                conHan.post(post_data);
+                String result = conHan.get();
                 return result;
             } catch (MalformedURLException e) {
                 e.printStackTrace();
@@ -351,12 +337,6 @@ public class Lobby extends AppCompatActivity {
                 builder.setMessage(result);
                 builder.setNegativeButton("Back", null);
             } else {
-                SharedPreferences pref = getApplicationContext().getSharedPreferences("data", MODE_PRIVATE);
-                SharedPreferences.Editor editor=pref.edit();
-                editor.putString("rid", result);
-                editor.putString("lid", LobbyID);
-                editor.putBoolean("rmAdmin",false);
-                editor.commit();
                 builder.setMessage("success");
                 builder.setPositiveButton("Enter Game Room", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog,
@@ -373,20 +353,4 @@ public class Lobby extends AppCompatActivity {
         }
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item){
-        int id = item.getItemId();
-        if(id == R.id.action_refresh){
-            String getroom_url = "http://come2jp.com/dominion/showGameRoom.php?LobbyID=" + LobbyID;
-            new GetGameRoomTask(this).execute(getroom_url);
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 }
