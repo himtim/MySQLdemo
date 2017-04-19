@@ -49,7 +49,7 @@ public class GameOver extends AsyncTask<String,Void,String> {
     @Override
     protected void onPostExecute(String result) {
         builder.setMessage(result);
-        if(result.equals("Game Finished")) {
+        if(result.startsWith("Game Finished")) {
             builder.setPositiveButton("Back to Lobby", new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog,
                                     int which) {

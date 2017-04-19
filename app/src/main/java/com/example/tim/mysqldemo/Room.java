@@ -325,7 +325,8 @@ public class Room extends AppCompatActivity {
         }
 
     }
-    public class StartGameTask extends AsyncTask<String,Void,String> {
+    public class StartGameTask extends AsyncTask<String,Void,String>
+    {
         Context context;
         StartGameTask (Context ctx) {
             context = ctx;
@@ -356,7 +357,7 @@ public class Room extends AppCompatActivity {
                 startActivity(intent);
                 (Room.this).finish();
             }
-        }
+    }
         @Override
         protected void onProgressUpdate(Void... values) {
             super.onProgressUpdate(values);
