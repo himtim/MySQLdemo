@@ -60,13 +60,11 @@ public class BackgroundWorker extends AsyncTask<String,Void,String> {
             try {
                 String username = params[1];
                 String password = params[2];
-                String password2 = params[3];
                 URL url = new URL(register_url);
                 conHan = new ConnectionHandler(url);
                 conHan.useSession(context);
                 String post_data = URLEncoder.encode("username","UTF-8")+"="+URLEncoder.encode(username,"UTF-8")+"&"
-                        +URLEncoder.encode("password","UTF-8")+"="+URLEncoder.encode(password,"UTF-8")+"&"
-                        +URLEncoder.encode("password2","UTF-8")+"="+URLEncoder.encode(password2,"UTF-8");
+                        +URLEncoder.encode("password","UTF-8")+"="+URLEncoder.encode(password,"UTF-8");
                 conHan.post(post_data);
                 String result = conHan.get();
                 return result;
@@ -87,7 +85,8 @@ public class BackgroundWorker extends AsyncTask<String,Void,String> {
 
     @Override
     protected void onPostExecute(String result) {
-        if(result.equals("fail")) {
+        if(result.startsWith("fail")) {
+
             builder.setMessage(result);
             builder.setNegativeButton("Back",null);
         }else{

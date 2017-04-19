@@ -26,31 +26,12 @@ public class GameOver extends AsyncTask<String,Void,String> {
     }
     @Override
     protected String doInBackground(String... params) {
-        String rid = params[0];
-        String gameover_url = params[1];
+        String gameover_url = params[0];
         try {
             URL url = new URL(gameover_url);
-            HttpURLConnection httpURLConnection = (HttpURLConnection)url.openConnection();
-            httpURLConnection.setRequestMethod("POST");
-            httpURLConnection.setDoOutput(true);
-            httpURLConnection.setDoInput(true);
-            OutputStream outputStream = httpURLConnection.getOutputStream();
-            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
-            String post_data = URLEncoder.encode("rid","UTF-8")+"="+URLEncoder.encode(rid,"UTF-8");
-            bufferedWriter.write(post_data);
-            bufferedWriter.flush();
-            bufferedWriter.close();
-            outputStream.close();
-            InputStream inputStream = httpURLConnection.getInputStream();
-            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream,"iso-8859-1"));
-            String result="";
-            String line="";
-            while((line = bufferedReader.readLine())!= null) {
-                result += line;
-            }
-            bufferedReader.close();
-            inputStream.close();
-            httpURLConnection.disconnect();
+            ConnectionHandler conHan = new ConnectionHandler(url);
+            conHan.useSession(context);
+            String result = conHan.get();
             return result;
         } catch (MalformedURLException e) {
             e.printStackTrace();

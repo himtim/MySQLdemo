@@ -33,7 +33,7 @@
         android:id="@+id/btn_join"
         android:background="@drawable/my_button_bg2"
         android:textStyle="bold"
-        android:textColor="#258e8e"
+        android:textColor="#ffffcc"
         android:layout_marginTop="3dp"
         android:layout_alignParentTop="true"
         android:layout_alignParentRight="true"

@@ -57,50 +57,32 @@ public class Game extends AppCompatActivity {
 
     public void OnDominate(View view){
         String GeneratorID = GeneratorIDEt.getText().toString();
-        SharedPreferences pref = getApplicationContext().getSharedPreferences("data", MODE_PRIVATE);
-        String rid = pref.getString("rid", null);
-        String uid = pref.getString("uid", null);
-        new OnDominate(this).execute(rid,uid,GeneratorID);
+        new OnDominate(this).execute(GeneratorID);
     }
     public void OnShowScore(View view) throws IOException {
-        SharedPreferences pref = getApplicationContext().getSharedPreferences("data", MODE_PRIVATE);
-        String rid = pref.getString("rid", null);
-        String score_url = "http://come2jp.com/dominion/showScore.php?rid="+rid;
+        String score_url = "http://come2jp.com/dominion/showScore.php";
         new GetScoreTask().execute(score_url);
     }
 
     public void OnShowPointStatus(View view) throws IOException {
-        SharedPreferences pref = getApplicationContext().getSharedPreferences("data", MODE_PRIVATE);
-        String rid = pref.getString("rid", null);
-        String point_url = "http://come2jp.com/dominion/showPointStatus.php?rid="+rid;
+        String point_url = "http://come2jp.com/dominion/showPointStatus.php";
         new GetPointTask().execute(point_url);
     }
 
     public void OnGameOver(View view) throws IOException {
-        SharedPreferences pref = getApplicationContext().getSharedPreferences("data", MODE_PRIVATE);
-        String rid = pref.getString("rid", null);
         String gameover_url = "http://come2jp.com/dominion/GameJudgement.php";
-        new GameOver(this).execute(rid,gameover_url);
+        new GameOver(this).execute(gameover_url);
     }
 
     public class GetScoreTask extends AsyncTask<String,String,String>{
         @Override
         protected String doInBackground(String... params) {
-            BufferedReader reader = null;
-            HttpURLConnection connection = null;
             try {
                 URL url = new URL(params[0]);
-                connection = (HttpURLConnection)url.openConnection();
-                connection.connect();
-                InputStream stream = connection.getInputStream();
-                reader = new BufferedReader(new InputStreamReader(stream));
-                StringBuilder sb = new StringBuilder();
-                StringBuffer buffer = new StringBuffer();
-                String line ="";
-                while((line=reader.readLine()) != null){
-                    buffer.append(line);
-                }
-                JSONObject parentObject = new JSONObject(buffer.toString());
+                ConnectionHandler conHan = new ConnectionHandler(url);
+                conHan.useSession(getApplicationContext());
+                String result = conHan.get();
+                JSONObject parentObject = new JSONObject(result);
                 //JSONArray parentArray = parentObject.getJSONArray("scores");
                 //JSONObject finalObject = parentArray.getJSONObject(0);
                 String A_Score = parentObject.getString("A_score");
@@ -109,16 +91,6 @@ public class Game extends AppCompatActivity {
             }catch (Exception e){
                 e.printStackTrace();
             } finally {
-                if (connection != null){
-                    connection.disconnect();
-                }
-                try{
-                    if(reader != null){
-                        reader.close();
-                    }
-                }catch (IOException e){
-                    e.printStackTrace();
-                }
             }
             return null;
         }
@@ -132,20 +104,12 @@ public class Game extends AppCompatActivity {
     public class GetPointTask extends AsyncTask<String,String,String>{
         @Override
         protected String doInBackground(String... params) {
-            BufferedReader reader = null;
-            HttpURLConnection connection = null;
             try {
                 URL url = new URL(params[0]);
-                connection = (HttpURLConnection)url.openConnection();
-                connection.connect();
-                InputStream stream = connection.getInputStream();
-                reader = new BufferedReader(new InputStreamReader(stream));
-                StringBuffer buffer = new StringBuffer();
-                String line ="";
-                while((line=reader.readLine()) != null){
-                    buffer.append(line);
-                }
-                JSONObject parentObject = new JSONObject(buffer.toString());
+                ConnectionHandler conHan = new ConnectionHandler(url);
+                conHan.useSession(getApplicationContext());
+                String result = conHan.get();
+                JSONObject parentObject = new JSONObject(result);
                 JSONArray parentArray = parentObject.getJSONArray("generators");
                 StringBuffer finalBufferedData = new StringBuffer();
                 for (int i=0;i<parentArray.length();i++){
@@ -158,16 +122,6 @@ public class Game extends AppCompatActivity {
             }catch (Exception e){
                 e.printStackTrace();
             } finally {
-                if (connection != null){
-                    connection.disconnect();
-                }
-                try{
-                    if(reader != null){
-                        reader.close();
-                    }
-                }catch (IOException e){
-                    e.printStackTrace();
-                }
             }
             return null;
         }
@@ -182,9 +136,20 @@ public class Game extends AppCompatActivity {
 
         @Override
         protected String doInBackground(String... params) {
-            SharedPreferences pref = getApplicationContext().getSharedPreferences("data", MODE_PRIVATE);
-            String rid = pref.getString("rid", null);
-            return rid;
+            try {
+                String get_url = "http://come2jp.com/dominion/getSessionData.php";
+                URL url = new URL(get_url);
+                ConnectionHandler conHan = new ConnectionHandler(url);
+                conHan.useSession(getApplicationContext());
+                String post_data = URLEncoder.encode("data", "UTF-8") + "=" + URLEncoder.encode("rid", "UTF-8");
+                conHan.post(post_data);
+                String result = conHan.get();
+                return result;
+            }catch (Exception e){
+                e.printStackTrace();
+            } finally {
+            }
+            return null;
         }
 
         @Override
@@ -204,34 +169,14 @@ public class Game extends AppCompatActivity {
         @Override
         protected String doInBackground(String... params) {
                 try {
+                    String GeneratorID = params[0];
                     builder.setTitle("Dominate Status");
-                    String rid = params[0];
-                    String uid = params[1];
-                    String GeneratorID = params[2];
                     URL url = new URL(dominate_url);
-                    HttpURLConnection httpURLConnection = (HttpURLConnection)url.openConnection();
-                    httpURLConnection.setRequestMethod("POST");
-                    httpURLConnection.setDoOutput(true);
-                    httpURLConnection.setDoInput(true);
-                    OutputStream outputStream = httpURLConnection.getOutputStream();
-                    BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(outputStream, "UTF-8"));
-                    String post_data = URLEncoder.encode("rid","UTF-8")+"="+URLEncoder.encode(rid,"UTF-8")+"&"
-                            +URLEncoder.encode("uid","UTF-8")+"="+URLEncoder.encode(uid,"UTF-8")+"&"
-                            +URLEncoder.encode("GeneratorID","UTF-8")+"="+URLEncoder.encode(GeneratorID,"UTF-8");
-                    bufferedWriter.write(post_data);
-                    bufferedWriter.flush();
-                    bufferedWriter.close();
-                    outputStream.close();
-                    InputStream inputStream = httpURLConnection.getInputStream();
-                    BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream,"iso-8859-1"));
-                    String result="";
-                    String line="";
-                    while((line = bufferedReader.readLine())!= null) {
-                        result += line;
-                    }
-                    bufferedReader.close();
-                    inputStream.close();
-                    httpURLConnection.disconnect();
+                    ConnectionHandler conHan = new ConnectionHandler(dominate_url);
+                    conHan.useSession(context);
+                    String post_data = URLEncoder.encode("GeneratorID","UTF-8")+"="+URLEncoder.encode(GeneratorID,"UTF-8");
+                    conHan.post(post_data);
+                    String result = conHan.get();
                     return result;
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
